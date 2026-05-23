@@ -1,0 +1,42 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.toml
+
+# n8n local self-hosted artifacts
+database.sqlite
+database.sqlite-journal
+.n8n/
+n8n_data/
+credentials/
+credentials.json
+credentials.*.json
+
+# Exported workflow backups (keep the canonical JSON, ignore timestamped copies)
+*.backup.json
+*-backup-*.json
+
+# OS junk
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Editor and IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.history/
+
+# Logs
+*.log
+logs/
+
+# Working notes and audit reports (kept locally, not pushed)
+improvements/
+

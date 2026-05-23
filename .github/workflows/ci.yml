@@ -1,0 +1,58 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-workflow:
+    name: Validate workflow JSON
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate every JSON file parses
+        run: |
+          set -euo pipefail
+          status=0
+          while IFS= read -r -d '' f; do
+            echo "Checking $f"
+            if ! python -m json.tool "$f" > /dev/null; then
+              echo "::error file=$f::Invalid JSON"
+              status=1
+            fi
+          done < <(find . -path ./node_modules -prune -o -name '*.json' -print0)
+          exit "$status"
+
+      - name: Block obvious committed secrets
+        run: |
+          set -euo pipefail
+          # Patterns: OpenAI keys, AWS keys, GitHub PATs, Slack tokens, generic private keys.
+          # Excludes this CI file itself so the patterns above do not match.
+          if grep -rEn --exclude-dir=.git --exclude='ci.yml' \
+            -e 'sk-[A-Za-z0-9_-]{20,}' \
+            -e 'AKIA[0-9A-Z]{16}' \
+            -e 'ghp_[A-Za-z0-9]{20,}' \
+            -e 'xox[baprs]-[A-Za-z0-9-]{10,}' \
+            -e 'BEGIN [A-Z ]*PRIVATE KEY' \
+            . ; then
+            echo "::error::Possible secret detected in committed files. Review the matches above."
+            exit 1
+          fi
+          echo "No obvious secrets found."
+
+      - name: Block em dash characters in tracked text files
+        run: |
+          set -euo pipefail
+          # U+2014 is the em dash. Project style prohibits it.
+          if grep -rPln --exclude-dir=.git -P '\x{2014}' . ; then
+            echo "::error::Em dash characters found. Use a hyphen, colon, comma, or parentheses instead."
+            exit 1
+          fi
+          echo "No em dashes found."
