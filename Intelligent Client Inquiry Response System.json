@@ -1,0 +1,142 @@
+{
+  "name": "Intelligent Client Inquiry Response System",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1dWJgoHuFsWXPNN3j5UrvLJAOKzHoD5gTjci-_UUQyr4",
+          "mode": "list",
+          "cachedResultName": "Start Your Digital Transformation (Responses)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dWJgoHuFsWXPNN3j5UrvLJAOKzHoD5gTjci-_UUQyr4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1663010813,
+          "mode": "list",
+          "cachedResultName": "Form responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dWJgoHuFsWXPNN3j5UrvLJAOKzHoD5gTjci-_UUQyr4/edit#gid=1663010813"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "de40cc7c-0515-42d2-bbd9-1dc1b7844d59",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "dZg6UV83osp7dfv2",
+          "name": "Google Sheets Trigger account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are Sarah, the Senior Solutions Architect at \"TechNova Solutions\". Your job is to read client inquiries and draft a professional, personalized email response. Your tone is warm, confident, and concise. Do not use placeholders like \"[Your Name]\"-sign off as \"Sarah from TechNova\"."
+            },
+            {
+              "content": "=Write a reply email to this lead:\n\nName:{{ $json['Full Name'] }}\nCompany:  {{ $json['Company Name'] }}\nService Interest: {{ $json['Service Required'] }} \nTheir Challenge: {{ $json['What is your biggest business challenge right now?'] }}\n\nStructure of the email (Format using HTML):\n1. Greeting: \"Hi [Name],<br><br>\"\n2. Opening: Acknowledge their interest in [Service Interest] at [Company].\n3. The Solution: Read their challenge. Write 2 sentences on how we solve it. <br><br>\n4. Call to Action: Propose a discovery call. Use <b>bold text</b> for the phrase \"15-minute discovery call this Thursday\".<br><br>\n5. Sign off: \"Best regards,<br>Sarah from TechNova\"\n\nIMPORTANT: Output ONLY the raw HTML body. Do not include ```html``` code blocks or a subject line."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "83d606c8-2d0b-4251-bc16-ae01bbc5a840",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "xa5PftXILRfBKU0e",
+          "name": "OpenAi account 15"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json['Business Email'] }}",
+        "subject": "=Re: Your inquiry regarding {{ $('Google Sheets Trigger').item.json['Service Required'] }}",
+        "message": "={{ $json.output[0].content[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "fc0c8084-c24f-4bdf-b9d0-5ff90caef855",
+      "name": "Send a message",
+      "webhookId": "e718e4c9-8a72-4c63-9d32-59d441e4ded5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "l2eryaY2VPZLpIUR",
+          "name": "Gmail account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1f1b2cbd-61d0-4df2-9128-3da22eb70dec",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f8915628d001c9f12c477501d438b0ef663b51074cad39b3fe2c37a0f1ebd929"
+  },
+  "id": "Q1n37Dse6amE1Bju",
+  "tags": []
+}
